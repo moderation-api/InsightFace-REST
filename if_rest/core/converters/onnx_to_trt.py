@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Union
 
@@ -110,6 +111,11 @@ def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp1
                                        force_fp16=force_fp16, max_batch_size=max_batch_size)
 
     assert not isinstance(engine, type(None))
+
+    # Ensure the target directory exists before writing the engine. Callers are
+    # expected to create it, but guarantee it here so a fresh model build can't
+    # fail with FileNotFoundError on a clean/bind-mounted models volume.
+    os.makedirs(os.path.dirname(engine_file_path), exist_ok=True)
 
     with open(engine_file_path, "wb") as f:
         if trt10:

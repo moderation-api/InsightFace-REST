@@ -1,0 +1,173 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "insightface-rest.manual",
+  "resources": [
+    {
+      "_id": "wrk_insightface",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "InsightFace-REST",
+      "description": "Face detection & recognition API (FastAPI). Routes live at the root, internal port 18081.",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_insightface",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "https://face-detect.dokploy.moderationapi.com",
+        "test_image": "https://github.com/SthPhoenix/InsightFace-REST/raw/master/misc/test_images/Stallone.jpg"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "test_image"]
+      },
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_utility",
+      "_type": "request_group",
+      "parentId": "wrk_insightface",
+      "name": "Utility",
+      "metaSortKey": -100
+    },
+    {
+      "_id": "fld_detection",
+      "_type": "request_group",
+      "parentId": "wrk_insightface",
+      "name": "Detection & Recognition",
+      "metaSortKey": -50
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "fld_utility",
+      "name": "Health",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health",
+      "body": {},
+      "headers": [],
+      "metaSortKey": -100
+    },
+    {
+      "_id": "req_info",
+      "_type": "request",
+      "parentId": "fld_utility",
+      "name": "Info (loaded models & config)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/info",
+      "body": {},
+      "headers": [],
+      "metaSortKey": -90
+    },
+    {
+      "_id": "req_docs",
+      "_type": "request",
+      "parentId": "fld_utility",
+      "name": "Swagger Docs",
+      "method": "GET",
+      "url": "{{ _.base_url }}/docs",
+      "body": {},
+      "headers": [],
+      "metaSortKey": -80
+    },
+    {
+      "_id": "req_extract",
+      "_type": "request",
+      "parentId": "fld_detection",
+      "name": "Extract (detect + embeddings + gender/age)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/extract",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"images\": {\n    \"urls\": [\"{{ _.test_image }}\"]\n  },\n  \"threshold\": 0.6,\n  \"extract_embedding\": true,\n  \"extract_ga\": true,\n  \"return_landmarks\": true,\n  \"return_face_data\": false,\n  \"limit_faces\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": -100
+    },
+    {
+      "_id": "req_extract_b64",
+      "_type": "request",
+      "parentId": "fld_detection",
+      "name": "Extract (base64 image data)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/extract",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"images\": {\n    \"data\": [\"REPLACE_WITH_BASE64_IMAGE_STRING\"]\n  },\n  \"threshold\": 0.6,\n  \"extract_embedding\": true,\n  \"extract_ga\": true\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": -90
+    },
+    {
+      "_id": "req_draw",
+      "_type": "request",
+      "parentId": "fld_detection",
+      "name": "Draw Detections (returns PNG)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/draw_detections",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"images\": {\n    \"urls\": [\"{{ _.test_image }}\"]\n  },\n  \"threshold\": 0.6,\n  \"draw_landmarks\": true,\n  \"draw_scores\": true,\n  \"draw_sizes\": true,\n  \"limit_faces\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": -80
+    },
+    {
+      "_id": "req_draw_multipart",
+      "_type": "request",
+      "parentId": "fld_detection",
+      "name": "Draw Detections (multipart file upload)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/multipart/draw_detections",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "file",
+            "type": "file",
+            "fileName": ""
+          },
+          {
+            "name": "threshold",
+            "value": "0.6"
+          },
+          {
+            "name": "draw_landmarks",
+            "value": "true"
+          },
+          {
+            "name": "draw_scores",
+            "value": "true"
+          },
+          {
+            "name": "draw_sizes",
+            "value": "true"
+          },
+          {
+            "name": "limit_faces",
+            "value": "0"
+          }
+        ]
+      },
+      "headers": [],
+      "metaSortKey": -70
+    }
+  ]
+}
