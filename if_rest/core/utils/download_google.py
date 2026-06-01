@@ -27,6 +27,11 @@ def check_hash(filename, hash, algo='md5'):
         'sha256': hashlib.sha256,
         'sha512': hashlib.sha512,
     }
+    # No expected hash provided (e.g. models.json entry without an 'md5' field):
+    # nothing to verify against, so treat the download as valid.
+    if not hash:
+        return True
+
     hasher = algos[algo]()
     with open(filename, 'rb') as f:
         while True:
