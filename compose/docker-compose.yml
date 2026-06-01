@@ -9,6 +9,11 @@ services:
       - .env
     volumes:
       - ../models:/models
+      # Persist downloaded ONNX weights and compiled TensorRT engines across
+      # deploys. Without these, every redeploy re-downloads models and
+      # recompiles TRT engines from scratch (the multi-minute startup cost).
+      - ifr_onnx:/models/onnx
+      - ifr_trt_engines:/models/trt-engines
       - ../if_rest:/app/if_rest
       - ../entrypoint.sh:/app/entrypoint.sh
       - ../misc/test_images:/images/test_images
@@ -29,3 +34,7 @@ services:
       # Must exceed model download + TRT engine warmup on first boot, otherwise
       # the container is killed mid-startup and never reaches "healthy".
       start_period: 240s
+
+volumes:
+  ifr_onnx:
+  ifr_trt_engines:

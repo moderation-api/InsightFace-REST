@@ -32,6 +32,10 @@ services:
       - *app
       - *entrypoint
       - *models
+      # Persist ONNX weights + compiled TRT engines across deploys (see notes
+      # in docker-compose.yml). Prevents re-download/re-compile on every redeploy.
+      - ifr_onnx:/models/onnx
+      - ifr_trt_engines:/models/trt-engines
     deploy:
       resources:
         reservations:
@@ -53,6 +57,10 @@ services:
       - *app
       - *entrypoint
       - *models
+      # Persist ONNX weights + compiled TRT engines across deploys (see notes
+      # in docker-compose.yml). Prevents re-download/re-compile on every redeploy.
+      - ifr_onnx:/models/onnx
+      - ifr_trt_engines:/models/trt-engines
     deploy:
       resources:
         reservations:
@@ -77,6 +85,10 @@ services:
       - *app
       - *entrypoint
       - *models
+      # Persist ONNX weights + compiled TRT engines across deploys (see notes
+      # in docker-compose.yml). Prevents re-download/re-compile on every redeploy.
+      - ifr_onnx:/models/onnx
+      - ifr_trt_engines:/models/trt-engines
 
   nginx:
     profiles: ['mgpu']
@@ -92,5 +104,9 @@ services:
       nofile:
         soft: 200000
         hard: 200000
+
+volumes:
+  ifr_onnx:
+  ifr_trt_engines:
 
 
