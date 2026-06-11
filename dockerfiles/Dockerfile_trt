@@ -24,5 +24,13 @@ WORKDIR /app
 COPY if_rest /app/if_rest
 COPY entrypoint.sh /app/entrypoint.sh
 
+# Bake in the model manifest and the /health self-check images so the image
+# is self-contained for k8s. Compose bind-mounts ../models over /models, so
+# this stays compatible with local development; in-cluster, only the onnx/
+# and trt-engines/ cache dirs are volume-mounted (PVC) and models.json is
+# read from the image.
+COPY models/models.json /models/models.json
+COPY misc/test_images /images/test_images
+
 ENTRYPOINT [ "bash" ]
 CMD ["entrypoint.sh"]
