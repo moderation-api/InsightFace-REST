@@ -1,4 +1,6 @@
-FROM python:3.8-slim
+# 3.10 floor: the code uses typing.Annotated (py3.9+), and matches the
+# python version in the TRT image's base (nvcr tensorrt 23.05 / Ubuntu 22.04).
+FROM python:3.10-slim
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -6,7 +8,7 @@ ENV PIP_INSTALL="python -m pip --no-cache-dir install --upgrade"
 
 RUN apt-get update &&\
     apt-get install -y\
-            libgl1-mesa-glx \
+            libgl1 \
             protobuf-compiler \
             libprotoc-dev \
             libb64-0d \
