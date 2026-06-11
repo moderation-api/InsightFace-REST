@@ -19,6 +19,8 @@ onnxruntime==1.16.3
 PyTurboJPEG==1.7.5
 exifread
 tritonclient[http,grpc]
+# transitive dep of tritonclient; >=1.21 has no py3.8 wheels (source build needs g++)
+python-rapidjson<=1.20
 imageio
 aiohttp
 tenacity
