@@ -33,6 +33,17 @@ if tobool(os.getenv('USE_NVJPEG', False)):
 else:
     jpeg = TurboJPEG()
 
+# Register Pillow openers for formats TurboJPEG/OpenCV can't decode (AVIF, HEIF/HEIC).
+# register_heif_opener() covers both HEIF and AVIF. Optional dependency: if pillow-heif
+# isn't installed we simply skip the fallback and behave as before.
+try:
+    import pillow_heif
+
+    pillow_heif.register_heif_opener()
+    _PILLOW_FALLBACK = True
+except Exception:
+    _PILLOW_FALLBACK = False
+
 settings = Settings()
 def_headers = settings.defaults.img_req_headers
 
@@ -178,6 +189,34 @@ def b64_to_bytes(b64encoded, b64_decode=True, **kwargs):
     return __bin, None
 
 
+def decode_with_pillow(im_bytes):
+    """
+    Fallback decoder for formats TurboJPEG and OpenCV can't handle (e.g. AVIF, HEIF/HEIC).
+    Requires pillow-heif; returns None if it's unavailable or decoding fails.
+
+    Args:
+        im_bytes (np.ndarray): The image bytes to be decoded.
+
+    Returns:
+        np.ndarray: The decoded image in BGR order, or None on failure.
+    """
+    if not _PILLOW_FALLBACK:
+        return None
+    try:
+        from PIL import Image, ImageOps
+
+        raw = im_bytes.tobytes() if isinstance(im_bytes, np.ndarray) else im_bytes
+        with Image.open(io.BytesIO(raw)) as img:
+            img = ImageOps.exif_transpose(img)  # honor EXIF orientation
+            img = img.convert('RGB')
+            arr = np.asarray(img)
+        # Convert RGB -> BGR to match TurboJPEG/cv2 output ordering.
+        return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+    except Exception:
+        logger.debug('Pillow decode failed', exc_info=True)
+        return None
+
+
 def decode_img_bytes(im_bytes, **kwargs):
     """
     Decodes the image bytes and returns it as a numpy array.
@@ -197,6 +236,9 @@ def decode_img_bytes(im_bytes, **kwargs):
     except:
         logger.debug('JPEG decoder failed, fallback to cv2.imdecode')
         _image = cv2.imdecode(im_bytes, cv2.IMREAD_COLOR)
+        if _image is None:
+            logger.debug('cv2.imdecode failed, fallback to Pillow (AVIF/HEIF)')
+            _image = decode_with_pillow(im_bytes)
     t1 = time.perf_counter()
     logger.debug(f'Decoding took: {(t1 - t0) * 1000:.3f} ms.')
     return _image

@@ -25,6 +25,9 @@ tritonclient[http,grpc]
 # transitive dep of tritonclient; >=1.21 has no py3.8 wheels (source build needs g++)
 python-rapidjson<=1.20
 imageio
+# AVIF/HEIF decode fallback for decode_img_bytes (image proxies serving image/avif,
+# iPhone HEIC uploads). register_heif_opener() covers both formats.
+pillow-heif
 aiohttp
 tenacity
 colorlog
